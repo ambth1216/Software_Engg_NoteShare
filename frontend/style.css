@@ -1,0 +1,114 @@
+html,
+body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    background-color: whitesmoke;
+    align-content: flex-start;
+}
+
+.navbar {
+    background-color: white;
+    display: flex;
+    justify-content: space-evenly;
+    padding: 10px;
+    text-align: center;
+    align-items: center;
+}
+
+.navlinks {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+}
+
+.navlinks a {
+    text-decoration: none;
+    color: black;
+}
+
+.button {
+    display: flex;
+    gap: 10px;
+    text-align: center;
+    justify-content: center;
+}
+
+.content {
+    font-size: 2em;
+    text-align: center;
+}
+
+.footer {
+    background-color: white;
+    text-align: center;
+    padding: 1em;
+}
+
+#btn-login,
+#btn-upload {
+    background-color: white;
+    color: #6A5ACD;
+    border: 1px solid #6A5ACD;
+    box-shadow: 0 2px 4px rgba(204, 201, 201, 0.949);
+}
+
+#btn-signup,
+#btn-browse {
+    background-color: #6A5ACD;
+    color: white;
+    border: 1px solid white;
+    box-shadow: 0 2px 4px rgba(204, 201, 201, 0.949);
+}
+
+#btn-logout {
+    background-color: #E74C3C;
+    color: white;
+    border: 1px solid white;
+    box-shadow: 0 2px 4px rgba(204, 201, 201, 0.949);
+}
+
+.button-p {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 8px;
+    transition: transform 0.1s ease-in-out;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.button-p:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    color: #5F50C2;
+    font-family: 'Lora   ', Courier, monospace;
+}
+
+.navlinks-p:hover {
+    color: #00c9a7;
+    border-radius: 5px;
+}
+
+.navlinks-p {
+    font-size: 1.5em;
+}
+
+.navlinks-p a:active {
+    color: #00c9a7;
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

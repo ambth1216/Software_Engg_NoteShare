@@ -1,0 +1,100 @@
+@import url("style.css");
+
+.head {
+    font-size: 2em;
+    padding-left: 3em;
+}
+
+.notes-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 3em 1em 3em;
+}
+
+.notes-controls input,
+.notes-controls select {
+    padding: 0.5em;
+    font-size: 1em;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+}
+
+.notes-count {
+    margin-left: auto;
+    color: #666;
+}
+
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 0 3em 2em 3em;
+}
+
+.note-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.note-title {
+    margin: 0 0 6px 0;
+    font-size: 1.1em;
+}
+
+.note-meta {
+    color: #666;
+    font-size: 0.95em;
+    margin-bottom: 6px;
+}
+
+.note-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+}
+
+.note-rating {
+    color: #7d7d7d;
+}
+
+.btn-view {
+    padding: 6px 12px;
+}
+
+.badge {
+    display: inline-block;
+    font-size: 0.75em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 6px;
+}
+
+.badge-verified {
+    background: #e2fbf5;
+    color: #0e9f84;
+}
+
+/* Skeletons */
+.skeleton { position: relative; overflow: hidden; }
+.sk-title, .sk-meta, .sk-actions {
+    background: #f1f1f1;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+.sk-title { height: 18px; width: 70%; }
+.sk-meta { height: 12px; width: 55%; }
+.sk-meta.short { width: 35%; }
+.sk-actions { height: 32px; width: 100%; }
+
+.notes-pagination {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0 2em 0;
+}

@@ -1,0 +1,47 @@
+@import url("style.css");
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 2.5%;
+}
+
+.form {
+    background-color: white;
+    width: 40%;
+    max-height: 70%;
+}
+
+.content {
+    font-size: 1em;
+    align-content: normal;
+    padding: 2em;
+    box-shadow: 0 2px 4px rgba(224, 220, 220, 0.15);
+    font-family: 'Lora   ', Courier, monospace;
+}
+
+input {
+    padding: 0.5em;
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    margin-top: 5px;
+}
+
+.content #login-submit {
+    background-color: #5F50C2;
+    color: aliceblue;
+    padding: 10px;
+    display: block;
+    width: 100%;
+}
+
+p a {
+    text-decoration: none;
+}
+
+p {
+    text-align: center;
+}

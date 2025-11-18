@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteSharePlatform~Home</title>
+    <link rel="stylesheet"   href="login.css">
+</head>
+<body >
+    <header>
+        <nav>
+            <div class="navbar">
+                <h1 class="logo">NoteShare</h1>
+                <div>
+                    <ol class="navlinks">
+                        <li><a href="index.html" class="navlinks-p">Home</a></li>
+                        <!-- Added ID for 'All Notes' link -->
+                        <li id="nav-all-notes"><a href="all-notes.html" class="navlinks-p">All Notes</a></li>
+                        <li><a href="teacher-notes.html" class="navlinks-p">Teacher Notes</a></li>
+                        <!-- Added ID for 'Upload' link and hidden by default -->
+                        <li id="nav-upload" style="display: none;"><a href="upload.html" class="navlinks-p">Upload</a></li>
+                    </ol>
+                </div>
+                <!-- All auth buttons are now in one div -->
+                <div class="button">
+                    <a class="button-p" id="btn-login" href="login.html">Login</a>
+                    <a class="button-p" id="btn-signup" href="signup.html">Sign Up</a>
+                    <!-- Logout button hidden by default -->
+                    <a class="button-p" id="btn-logout" href="#" style="display: none;">Logout</a>
+                </div>
+            </div>
+        </nav> 
+    </header>
+    <main>
+        <div class="form" >
+            <form action="/" class="content" id="login-form">
+                <h2>Login in to your account</h2>
+
+                <div><label for="email-add">Email Address</label>
+                    <br>
+                    <input type="email" id="email-add" name="email-add" placeholder="Enter Email Address" required>
+                </div>
+                <div><label for="password">Password</label>
+                    <br>
+                    <input type="password" id="password" name="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" id="login-submit" class="button-p">Login</button>
+                <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+            </form>
+        </div>
+    </main>
+    <footer>
+        <div class="footer">
+                <p>2025 NoteShare Platform. All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="auth.js" defer></script>
+</body>
+</html>
