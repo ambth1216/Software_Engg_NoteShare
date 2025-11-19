@@ -115,7 +115,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
     1. Clone the repository:
     ```
-    git clone [https://github.com/your-username/notes-backend.git](https://github.com/your-username/notes-backend.git)
+    git clone [https://github.com/your-username/notes-backend.git](https://github.com/ambth1216/Software_Engg_NoteShare)
     cd notes-backend
     ```
 
