@@ -114,10 +114,11 @@ Follow these instructions to get a copy of the project up and running on your lo
 1. Backend Setup
 
     1. Clone the repository:
-    ```
-    git clone [https://github.com/your-username/notes-backend.git](https://github.com/ambth1216/Software_Engg_NoteShare)
+    
+    `git clone` [https://github.com/your-username/notes-backend.git](https://github.com/ambth1216/Software_Engg_NoteShare)
+    
     cd notes-backend
-    ```
+    
 
     2. Install dependencies:
 
