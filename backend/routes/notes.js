@@ -138,7 +138,7 @@ router.get('/', async (req, res) => {
 
 router.get('/download/:id', async (req, res) => {
   try {
-    const note = await Note.findById(req.params.id);
+    const note = await Note.findById(req.params.id); // get the id of the note from the params 
     if (!note) {
       return res.status(404).json({ success: false, message: 'Note not found' });
     }
@@ -150,7 +150,7 @@ router.get('/download/:id', async (req, res) => {
     // Result: .../notes-backend/uploads/filename.pdf
     const filePath = path.join(__dirname, '..', note.filePath);
     
-    const originalName = note.originalFileName;
+    const originalName = note.originalFileName;  
 
     // This command sends the file for download
     res.download(filePath, originalName, (err) => {
@@ -160,7 +160,7 @@ router.get('/download/:id', async (req, res) => {
           res.status(404).json({ success: false, message: 'File not found on server.' });
         }
       }
-    });
+    })
 
   } catch (err) {
     console.error(err);
