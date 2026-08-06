@@ -5,25 +5,96 @@ const path = require('path');
 const Note = require('../models/Note');
 const { protect } = require('../middleware/auth');
 
-// Uploading file with the help of multer
-const storage = multer.diskStorage({
-  destination: './uploads', // will be created by multer when file will be uploaded 
-  // filename (unique)
-  filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
+function createCloudFrontUrl(objectKey) {
+  const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN;
 
-// uloading file
+  if (!cloudFrontDomain) {
+    throw new Error('CLOUDFRONT_DOMAIN is not configured');
+  }
+
+  // Accepts both:
+  // d123example.cloudfront.net
+  // https://d123example.cloudfront.net
+  const cleanDomain = cloudFrontDomain
+    .replace(/^https?:\/\//, '')
+    .replace(/\/+$/, '');
+
+  // Properly encode spaces and special characters while preserving folders.
+  const encodedKey = objectKey
+    .split('/')
+    .map(encodeURIComponent)
+    .join('/');
+
+  return `https://${cleanDomain}/${encodedKey}`;
+}
+
+// Check if AWS S3 environment variables are provided
+const isS3Enabled = process.env.USE_S3 === 'true' || !!process.env.AWS_S3_BUCKET_NAME;
+
+let storage;
+
+if (isS3Enabled) {
+  try {
+    const { S3Client } = require('@aws-sdk/client-s3');
+    const multerS3 = require('multer-s3');
+
+    const s3 = new S3Client({
+      region: process.env.AWS_REGION || 'ap-south-1',
+    });
+
+    storage = multerS3({
+      s3,
+      bucket: process.env.AWS_S3_BUCKET_NAME,
+
+      // Preserves the correct browser content type:
+      // application/pdf, image/jpeg, etc.
+      contentType: multerS3.AUTO_CONTENT_TYPE,
+
+      metadata: function (req, file, cb) {
+        cb(null, {
+          fieldName: file.fieldname,
+          originalName: file.originalname,
+        });
+      },
+
+      key: function (req, file, cb) {
+        // Remove potentially unsafe characters from the original filename.
+        const safeFileName = path
+          .basename(file.originalname)
+          .replace(/[^a-zA-Z0-9._-]/g, '_');
+
+        const objectKey = `notes/${Date.now()}_${safeFileName}`;
+
+        cb(null, objectKey);
+      },
+    });
+    console.log('AWS S3 Storage engine initialized successfully.');
+  } catch (err) {
+    console.error('Failed to initialize AWS S3 storage engine, falling back to local disk storage:', err.message);
+    storage = multer.diskStorage({
+      destination: './uploads',
+      filename: function (req, file, cb) {
+        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+      },
+    });
+  }
+} else {
+  // Local disk storage engine
+  storage = multer.diskStorage({
+    destination: './uploads',
+    filename: function (req, file, cb) {
+      cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+    },
+  });
+}
+
+// Upload middleware setup
 const upload = multer({
-  storage: storage, // destination and filename
-  limits: { fileSize: 10000000 }, // 10MB file size limit for now, later it will be scaled up
+  storage: storage,
+  limits: { fileSize: 10000000 }, // 10MB limit
   fileFilter: function (req, file, cb) {
-    // Allowed extensions
     const filetypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|ppt|pptx/;
-    // Check extension
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    // Check mime type
     const mimetype = filetypes.test(file.mimetype);
 
     if (mimetype && extname) {
@@ -32,14 +103,14 @@ const upload = multer({
       cb('Error: Files of this type are not allowed!');
     }
   },
-}).single('file'); // "file" is the filled name to be setup in frontend
+}).single('file');
 
-// Uploading notes route and controller
+// Upload notes route
 router.post('/upload', protect, (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
       console.log(err);
-      return res.status(400).json({ success: false, message: err });
+      return res.status(400).json({ success: false, message: typeof err === 'string' ? err : err.message });
     }
 
     if (!req.file) {
@@ -52,15 +123,31 @@ router.post('/upload', protect, (req, res) => {
     }
 
     try {
+      // Determine file URL & path depending on S3 vs local storage
+      let fileUrl;
+      let storedFilePath;
+
+      if (isS3Enabled && req.file.key) {
+        // Store the CloudFront URL for viewing.
+        fileUrl = createCloudFrontUrl(req.file.key);
+
+        // Store only the S3 object key for backend operations.
+        storedFilePath = req.file.key;
+      } else {
+        // Local development fallback.
+        fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        storedFilePath = req.file.path;
+      }
+
       const newNote = await Note.create({
         title,
         subject,
-        viewUrl: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`,
-        filePath: req.file.path,
+        viewUrl: fileUrl,
+        filePath: storedFilePath,
         originalFileName: req.file.originalname,
-        uploader: req.user.id, 
-        uploaderName: req.user.name, 
-        uploaderRole: req.user.role, 
+        uploader: req.user.id,
+        uploaderName: req.user.name,
+        uploaderRole: req.user.role,
       });
 
       res.status(201).json({
@@ -74,34 +161,30 @@ router.post('/upload', protect, (req, res) => {
   });
 });
 
-// Roter to get the notes from DB and its controller
+// Route to get notes from DB with filtering & pagination
 router.get('/', async (req, res) => {
   try {
     let query = {};
-    // Role Filtering (for 'teacher-notes' page)
     if (req.query.role === 'teacher') {
       query.uploaderRole = 'teacher';
       query.verified = true;
     }
 
-    // "Subject" filtering
     if (req.query.subject) {
       query.subject = req.query.subject;
     }
 
-    // Search query 
     if (req.query.q) {
       query.$text = { $search: req.query.q };
     }
 
-    // sorting on the basis of recent, rating, title
     let sortOptions = {};
     switch (req.query.sort) {
       case 'rating':
-        sortOptions = { rating: -1 }; 
+        sortOptions = { rating: -1 };
         break;
       case 'title':
-        sortOptions = { title: 1 }; 
+        sortOptions = { title: 1 };
         break;
       case 'recent':
       default:
@@ -112,7 +195,6 @@ router.get('/', async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 9;
     const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
 
     const total = await Note.countDocuments(query);
 
@@ -135,36 +217,51 @@ router.get('/', async (req, res) => {
   }
 });
 
-
+// Download note route
 router.get('/download/:id', async (req, res) => {
   try {
-    const note = await Note.findById(req.params.id); // get the id of the note from the params 
+    const note = await Note.findById(req.params.id);
+
     if (!note) {
-      return res.status(404).json({ success: false, message: 'Note not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Note not found',
+      });
     }
 
-    // This builds the absolute path to the file
-    // __dirname is .../notes-backend/routes
-    // '..' goes up to .../notes-backend/
-    // note.filePath is 'uploads/filename.pdf'
-    // Result: .../notes-backend/uploads/filename.pdf
-    const filePath = path.join(__dirname, '..', note.filePath);
-    
-    const originalName = note.originalFileName;  
+    // S3 objects are stored using the notes/ prefix.
+    if (note.filePath && note.filePath.startsWith('notes/')) {
+      const cloudFrontUrl = createCloudFrontUrl(note.filePath);
+      return res.redirect(cloudFrontUrl);
+    }
 
-    // This command sends the file for download
-    res.download(filePath, originalName, (err) => {
-      if (err) {
-        console.error("File download error:", err);
-        if (!res.headersSent) {
-          res.status(404).json({ success: false, message: 'File not found on server.' });
+    // Local development file.
+    const localFilePath = path.join(__dirname, '..', note.filePath);
+
+    res.download(
+      localFilePath,
+      note.originalFileName,
+      (downloadError) => {
+        if (downloadError) {
+          console.error('File download error:', downloadError);
+
+          if (!res.headersSent) {
+            res.status(404).json({
+              success: false,
+              message: 'File not found on server',
+            });
+          }
         }
       }
-    })
+    );
+  } catch (error) {
+    console.error(error);
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+    });
   }
 });
+
 module.exports = router;

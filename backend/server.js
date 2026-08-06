@@ -8,20 +8,27 @@ dotenv.config(); // Configuring the environment variable to use it accross the m
 
 const connectDB = require('./config/db'); // Importing function to connect with B
 
-/*Importing all the routes*/ 
-const authRoutes = require('./routes/auth'); 
+/*Importing all the routes*/
+const authRoutes = require('./routes/auth');
 const noteRoutes = require('./routes/notes');
-
 connectDB(); // Attemping to connect to MongogoDB
 
 const app = express(); // Express app inisitiation
+
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    service: 'noteshare-backend',
+    timestamp: new Date().toISOString(),
+  });
+});
 
 /* ---Middlewares-- 
     1. Setting Cross-origin so that browser do not block connection to the backend url
     2. Parse the JSON Body send by the client
     3. Parse URL encoded body send by lient (some form send data through url)
 */
-app.use(cors()); 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

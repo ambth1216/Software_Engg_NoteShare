@@ -1,5 +1,9 @@
 // Simple frontend for All Notes / Teacher Notes pages
 (function () {
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '3000'
+        ? 'http://localhost:5000'
+        : '';
+
     const state = {
         page: 1,
         pageSize: 9,
@@ -25,7 +29,7 @@
     };
 
     function endpoint() {
-        const base = "http://localhost:5000/api/notes";
+        const base = `${API_BASE}/api/notes`;
         const params = new URLSearchParams();
         if (pageType === "teacher") params.set("role", "teacher");
         if (state.query) params.set("q", state.query);
@@ -58,11 +62,11 @@
         const verified = note.verified ? '<span class="badge badge-verified">Verified</span>' : "";
         const uploader = note.uploaderName ? `Uploaded by ${note.uploaderName}` : "";
         const subject = note.subject ? `Subject: ${note.subject}` : "";
-        
+
         // View link (direct link to file)
         const viewHref = note.viewUrl || "#";
         // Download link
-        const downloadHref = `http://localhost:5000/api/notes/download/${note._id}`;
+        const downloadHref = `${API_BASE}/api/notes/download/${note._id}`;
 
         return (
             '<div class="note-card">\
@@ -71,7 +75,6 @@
                 <div class="note-meta">' + subject + '</div>\
                 <div class="note-footer">\
                     <span class="note-rating">' + star(note.rating) + '</span>\
-                    <!-- Added a div to group buttons -->\
                     <div class="note-actions">\
                         <a class="button-p btn-view" href="' + viewHref + '" target="_blank" rel="noopener">View</a>\
                         <a class="button-p btn-download" href="' + downloadHref + '">Download</a>\
@@ -96,7 +99,7 @@
     async function load() {
         renderSkeleton(6);
         try {
-            const token = (function(){ try { return JSON.parse(localStorage.getItem("nsp_auth")||"null")?.token; } catch { return null; } })();
+            const token = (function () { try { return JSON.parse(localStorage.getItem("nsp_auth") || "null")?.token; } catch { return null; } })();
             const headers = { "Accept": "application/json" };
             if (token) headers["Authorization"] = `Bearer ${token}`;
             const res = await fetch(endpoint(), { headers });
