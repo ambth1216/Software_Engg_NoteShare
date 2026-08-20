@@ -11,7 +11,7 @@ services:
     environment:
       - PORT=5000
       # MongoDB Atlas Cloud Connection String:
-      - MONGO_URI=mongodb+srv://amishrabth1619_db_user:8Xb6DfGuXHk8tJ9f@notesharecluster.zs6zkus.mongodb.net/noteshare?retryWrites=true&w=majority&appName=NoteShareCluster
+      - MONGO_URI=mongodb+srv://<your_db_name>:<your_password>@notesharecluster.zs6zkus.mongodb.net/noteshare?retryWrites=true&w=majority&appName=NoteShareCluster
       - JWT_SECRET=your_jwt_secret_key_change_in_production
       # AWS S3 Configuration (Set USE_S3=true when using AWS S3 for cloud storage):
       # - USE_S3=false
